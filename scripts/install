@@ -16,10 +16,6 @@ app=invoiceninja
 # Check domain/path availability
 	sudo yunohost app checkurl $domain$path -a $app \
 		|| (echo "Path not available: $domain$path" && exit 1)
-
-# Install dependencies
-	sudo curl -sS https://getcomposer.org/installer | php
-	sudo mv composer.phar /usr/local/bin/composer
 	
 # Copy source files
 	final_path=/var/www/$app
@@ -53,7 +49,9 @@ app=invoiceninja
 	sudo su -c "php $final_path/artisan optimize"
 	
 # Install the app
-	sudo composer install --no-dev -o -d $final_path
+	sudo su -c "curl -sS https://getcomposer.org/installer | php -- --install-dir=$final_path" -s /bin/sh www-data
+	sudo su -c "cd $final_path && php composer.phar install" -s /bin/sh www-data
+	sudo rm $final_path/composer*
 
 # Modify Nginx configuration file and copy it to Nginx conf directory
 	sed -i "s@YNH_WWW_PATH@$path@g" ../conf/nginx.conf

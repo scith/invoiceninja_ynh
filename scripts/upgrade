@@ -22,6 +22,11 @@ app=invoiceninja
 # Set permissions to app files
 	sudo chmod -R 755 $final_path/storage
 	sudo chown -R www-data:www-data $final_path/storage $final_path/public/logo
+	
+# Install the app
+	sudo su -c "curl -sS https://getcomposer.org/installer | php -- --install-dir=$final_path" -s /bin/sh www-data
+	sudo su -c "cd $final_path && php composer.phar install" -s /bin/sh www-data
+	sudo rm $final_path/composer*
 
 # Modify Nginx configuration file and copy it to Nginx conf directory
 	sed -i "s@YNH_WWW_PATH@$path@g" ../conf/nginx.conf
