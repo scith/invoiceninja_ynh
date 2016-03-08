@@ -19,7 +19,7 @@ version='v2.5.0.4'
 	final_path=/var/www/$app
 	sudo mkdir -p $final_path
 	sudo unzip -qq ../sources/ninja-$version.zip
-	sudo cp -a ../sources/ninja/. $final_path
+	sudo cp -a ninja/. $final_path
 
 # Set permissions to app files
 	sudo chmod -R 755 $final_path/storage/
