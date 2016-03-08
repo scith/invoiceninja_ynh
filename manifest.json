@@ -1,0 +1,52 @@
+{
+    "name": "Invoice Ninja",
+    "id": "invoiceninja",
+    "description": {
+        "en": "An application to invoice clients online.",
+        "fr": "Une application pour facturer des clients en ligne."
+    },
+    "url": "https://www.invoiceninja.com/",
+    "license": "free",
+    "maintainer": {
+        "name": "Scith",
+        "url": "https://github.com/scith"
+    },
+    "multi_instance": "true",
+    "services": [
+        "nginx",
+        "php5-fpm",
+        "mysql"
+    ],
+    "arguments": {
+        "install" : [
+            {
+                "name": "domain",
+				"type": "domain",
+                "ask": {
+                    "en": "Choose a domain name for Invoice Ninja",
+                    "fr": "Choisissez un nom de domaine pour Invoice Ninja"
+                },
+                "example": "example.com"
+            },
+            {
+                "name": "path",
+				"type": "path",
+                "ask": {
+                    "en": "Choose a path for Invoice Ninja",
+                    "fr": "Choisissez un chemin pour Invoice Ninja"
+                },
+                "example": "/invoice",
+                "default": "/invoice"
+            },
+            {
+                "name": "user",
+				"type": "user",
+                "ask": {
+                    "en": "Choose the user who will use Invoice Ninja",
+                    "fr": "Choisissez l’utilisateur qui pourra utiliser Invoice Ninja"
+                },
+                "example": "johndoe"
+            }
+        ]
+    }
+}

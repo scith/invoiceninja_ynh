@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# causes the shell to exit if any subcommand or pipeline returns a non-zero status
+set -e
+
+app=invoiceninja
+
+# Retrieve arguments
+	domain=$1
+	path=$2
+	user=$3
+
+# Save app settings
+	sudo yunohost app setting $app user -v "$user"
+
+# Check domain/path availability
+	sudo yunohost app checkurl $domain$path -a $app \
+		|| (echo "Path not available: $domain$path" && exit 1)
+
+# Install dependencies
+	sudo curl -sS https://getcomposer.org/installer | php
+	sudo mv composer.phar /usr/local/bin/composer
+	
+# Copy source files
+	final_path=/var/www/$app
+	sudo mkdir -p $final_path
+	sudo cp -a ../sources/ninja. $final_path
+
+# Set permissions to app files
+	sudo chmod -R 755 $final_path/storage
+	sudo chown -R www-data:www-data $final_path/storage $final_path/public/logo
+
+# Set MySQL database
+	db_pwd=$(openssl rand -hex 15)
+	sudo yunohost app initdb $app -p $db_pwd
+	sudo yunohost app setting $app mysqlpwd -v $db_pwd
+	
+# Generate App key
+	app_key=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+	sudo yunohost app setting $app app_key -v $app_key
+	
+# Modify the config file
+	sudo cp ../sources/ninja/.env.example $final_path/.env
+	sed -i "s@URL_TO_CHANGE@$domain$path@g" $final_path/.env
+	#sed -i "s@APPKEY_TO_CHANGE@$app_key@g" $final_path/.env
+	sed -i "s@DBNAME_TO_CHANGE@$app@g" $final_path/.env
+	sed -i "s@DBUSER_TO_CHANGE@$app@g" $final_path/.env
+	sed -i "s@DBPASS_TO_CHANGE@$db_pwd@g" $final_path/.env
+	sudo chown www-data:www-data $final_path/.env
+	# Mail TODO
+	# Client SSO TODO
+	sudo su -c "php $final_path/artisan migrate –seed"
+	sudo su -c "php $final_path/artisan optimize"
+	
+# Install the app
+	sudo composer install --no-dev -o -d $final_path
+
+# Modify Nginx configuration file and copy it to Nginx conf directory
+	sed -i "s@YNH_WWW_PATH@$path@g" ../conf/nginx.conf
+	sed -i "s@YNH_WWW_ALIAS@$final_path/public/@g" ../conf/nginx.conf
+	sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+
+# Create CRON
+	#touch cron.sh
+	#cat << EOF > cron.sh
+		#!/bin/sh
+		#/usr/local/bin/php $final_path/artisan ninja:send-invoices
+		#/usr/local/bin/php $final_path/artisan ninja:send-reminders		
+	#EOF
+	#sudo cp cron.sh /etc/cron.daily/$app.sh
+	
+# Public app for now
+	sudo yunohost app setting $app unprotected_uris -v "/"
+
+# Restart services
+	sudo service nginx reload
+	sudo yunohost app ssowatconf
