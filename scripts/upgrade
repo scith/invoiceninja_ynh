@@ -17,7 +17,7 @@ app=invoiceninja
 # Copy source files
 	final_path=/var/www/$app
 	sudo mkdir -p $final_path
-	sudo cp -a ../sources/ninja. $final_path
+	sudo cp -a ../sources/ninja/. $final_path
 
 # Set permissions to app files
 	sudo chmod -R 755 $final_path/storage
