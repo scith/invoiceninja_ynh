@@ -6,6 +6,7 @@ Not working yet! Test at your own risk.
 **Current version of InvoiceNinja:** 2.5.0.4. (See [upcoming features](https://trello.com/b/63BbiVVe/invoice-ninja))
 
 ## To do ##
+- Fix NGINX.
 - Mail config.
 - Automatic user creation.
 - SSO config for clients.
